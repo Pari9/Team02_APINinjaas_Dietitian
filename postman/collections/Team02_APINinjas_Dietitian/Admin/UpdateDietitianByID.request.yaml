@@ -1,0 +1,18 @@
+$kind: http-request
+url: "{{baseURL}}/patient/{{envPatientId}}"
+method: PUT
+body:
+  type: formdata
+  content:
+    - type: text
+      key: patientinfo
+      value: '	{"FirstName": "{{firstName}}", "LastName": "{{lastName}}", "ContactNumber": "{{contactNumber}}", "Email": "{{email}}", "Allergy": "{{allergy}}", "FoodPreference": "{{foodPreference}}", "CuisineCategory": "{{cuisineCategory}}", "DateOfBirth": "{{dateOfBirth}}"}'
+    - type: file
+      key: file
+      src: []
+      disabled: true
+auth:
+  type: bearer
+  credentials:
+    token: "{{dieticianToken}}"
+order: 4000

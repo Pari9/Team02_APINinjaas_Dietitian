@@ -1,0 +1,140 @@
+$kind: http-request
+url: "{{baseURL}}{{currentEndpoint}}"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{currentToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      // Read the expected status code and scenario name from variables
+      const expectedStatus = Number(pm.variables.get("currentExpectedStatus"));
+      const scenario = pm.variables.get("currentScenario");
+
+      // 1. Log the currently executing scenario to the Postman Console
+      console.log(` ${scenario}`);
+
+      // Validate status code only
+      pm.test(scenario, function () {
+          pm.response.to.have.status(expectedStatus);
+      });
+
+      // Increment testIndex for the next iteration
+      let testIndex = Number(pm.collectionVariables.get("testIndex")) || 0;
+      testIndex++;
+
+      const totalTestCases = 5; // Total count of test cases in your array
+
+      if (testIndex < totalTestCases) {
+          pm.collectionVariables.set("testIndex", testIndex);
+
+          pm.execution.setNextRequest(pm.info.requestName);
+      } else {
+          // Reset index back to 0 when all runs complete
+          pm.collectionVariables.set("testIndex", 0);
+          pm.execution.setNextRequest(null);
+      }
+    language: text/javascript
+  - type: beforeRequest
+    code: "// 1. Retrieve testIndex safely (defaults to 0 if undefined or invalid)\r
+
+      let testIndex = Number(pm.collectionVariables.get(\"testIndex\"));\r
+
+      if (isNaN(testIndex) || testIndex < 0) {\r
+
+      \    testIndex = 0;\r
+
+      }\r
+
+      \r
+
+      // 2. Test dataset\r
+
+      const testCases = [\r
+
+      \    {\r
+
+      \        scenario: \"Retrieve all dietitians - Success\",\r
+
+      \        endpoint: \"/dietician\",\r
+
+      \        tokenValue: pm.collectionVariables.get(\"adminToken\"),\r
+
+      \        expectedStatus: 200\r
+
+      \    },\r
+
+      \    {\r
+
+      \        scenario: \"Unauthorized - Invalid token\",\r
+
+      \        endpoint: \"/dietician\",\r
+
+      \        tokenValue: \"juhsyejksdfd\",\r
+
+      \        expectedStatus: 401\r
+
+      \    },\r
+
+      \    {\r
+
+      \        scenario: \"Unauthorized - Empty token\",\r
+
+      \        endpoint: \"/dietician\",\r
+
+      \        tokenValue: \"\",\r
+
+      \        expectedStatus: 401\r
+
+      \    },\r
+
+      \    {\r
+
+      \        scenario: \"Not Found - Invalid endpoint\",\r
+
+      \        endpoint: \"/wrong-endpoint\",\r
+
+      \        tokenValue: pm.collectionVariables.get(\"adminToken\"),\r
+
+      \        expectedStatus: 404\r
+
+      \    },\r
+
+      \    {\r
+
+      \        scenario: \"Bad Request - Invalid parameter\",\r
+
+      \        endpoint: \"/dietician?&^limit=-1\",\r
+
+      \        tokenValue: pm.collectionVariables.get(\"adminToken\"),\r
+
+      \        expectedStatus: 400\r
+
+      \    }\r
+
+      ];\r
+
+      \r
+
+      // 3. Extract the test case for the current loop iteration\r
+
+      const currentTest = testCases[testIndex];\r
+
+      \r
+
+      if (currentTest) {\r
+
+      \    // Map variables for request URL and test assertions\r
+
+      \    pm.variables.set(\"currentEndpoint\", currentTest.endpoint);\r
+
+      \    pm.variables.set(\"currentScenario\", currentTest.scenario);\r
+
+      \    pm.variables.set(\"currentToken\",currentTest.tokenValue|| \"\");\r
+
+      \    pm.variables.set(\"currentExpectedStatus\", currentTest.expectedStatus);    \r
+
+      } "
+    language: text/javascript
+order: 1000

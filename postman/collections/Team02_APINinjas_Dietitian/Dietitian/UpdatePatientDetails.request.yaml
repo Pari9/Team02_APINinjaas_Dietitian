@@ -1,0 +1,1099 @@
+$kind: http-request
+url: "{{baseURL}}/patient/{{requestPatientId}}"
+method: PUT
+body:
+  type: formdata
+  content:
+    - type: text
+      key: FirstName
+      value: "{{firstName}}"
+    - type: text
+      key: LastName
+      value: "{{lastName}}"
+    - type: text
+      key: ContactNumber
+      value: "{{contactNumber}}"
+    - type: text
+      key: Email
+      value: "{{email}}"
+    - type: text
+      key: Allergy
+      value: "{{allergy}}"
+    - type: text
+      key: FoodPreference
+      value: "{{foodPreference}}"
+    - type: text
+      key: CuisineCategory
+      value: "{{cuisineCategory}}"
+    - type: text
+      key: DateOfBirth
+      value: "{{dateOfBirth}}"
+    - type: file
+      key: file
+      src: []
+auth:
+  type: bearer
+  credentials:
+    token: "{{dieticianToken}}"
+scripts:
+  - type: beforeRequest
+    code: "// UPDATE PATIENT - PRE-REQUEST SCRIPT\r
+
+      \r
+
+      \r
+
+      // 1. GET UPDATE TEST INDEX\r
+
+      \r
+
+      let testIndex = Number(\r
+
+      \    pm.collectionVariables.get(\"updateTestIndex\")\r
+
+      );\r
+
+      \r
+
+      if (isNaN(testIndex) || testIndex < 0) {\r
+
+      \    testIndex = 0;\r
+
+      }\r
+
+      \r
+
+      \r
+
+      // 2. UPDATE PATIENT TEST SCENARIOS\r
+
+      \r
+
+      const testCases = [\r
+
+      \    \"valid\",\r
+
+      \    \"invalidEmail\",\r
+
+      \    \"invalidPatientId\",\r
+
+      \    \"negativePatientId\",\r
+
+      \    \"invalidContactNumber\",\r
+
+      \    \"updateContactNumber\",\r
+
+      \    \"updateAllergy\",\r
+
+      \    \"invalidAllergy\",\r
+
+      \    \"missingAllergy\",\r
+
+      \    \"updateFoodPreference\",\r
+
+      \    \"invalidFoodPreference\",\r
+
+      \    \"validCuisine\",\r
+
+      \    \"invalidCuisine\",\r
+
+      \    \"duplicateContactDOB\",\r
+
+      \    \"invalidDOBFormat\",\r
+
+      \    \"futureDOB\",\r
+
+      \    \"missingFirstName\",\r
+
+      \    \"missingLastName\",\r
+
+      \    \"invalidToken\",\r
+
+      \    \"missingAuthorization\"\r
+
+      ];\r
+
+      \r
+
+      \r
+
+      // 3. GET CURRENT SCENARIO\r
+
+      \r
+
+      const scenario = testCases[testIndex];\r
+
+      \r
+
+      pm.collectionVariables.set(\r
+
+      \    \"currentUpdateScenario\",\r
+
+      \    scenario\r
+
+      );\r
+
+      \r
+
+      console.log(\r
+
+      \    \"Update Test Index:\",\r
+
+      \    testIndex\r
+
+      );\r
+
+      \r
+
+      console.log(\r
+
+      \    \"Update Patient Scenario:\",\r
+
+      \    scenario\r
+
+      );\r
+
+      \r
+
+      \r
+
+      // 4. GET PATIENT ID CREATED BY CREATE PATIENT\r
+
+      \r
+
+      const envPatientId = pm.collectionVariables.get(\"envPatientId\");\r
+
+      \r
+
+      console.log(\r
+
+      \    \"envPatientId:\",\r
+
+      \    envPatientId\r
+
+      );\r
+
+      \r
+
+      if (!envPatientId) {\r
+
+      \    throw new Error(\r
+
+      \        \"envPatientId is missing. Run Create Patient first.\"\r
+
+      \    );\r
+
+      }\r
+
+      \r
+
+      \r
+
+      // 5. DEFAULT PATIENT ID\r
+
+      \r
+
+      let requestPatientId = envPatientId;\r
+
+      \r
+
+      \r
+
+      // 6. DEFAULT VALID PATIENT DETAILS\r
+
+      \r
+
+      pm.variables.set(\r
+
+      \    \"firstName\",\r
+
+      \    \"John\"\r
+
+      );\r
+
+      \r
+
+      pm.variables.set(\r
+
+      \    \"lastName\",\r
+
+      \    \"Smith\"\r
+
+      );\r
+
+      \r
+
+      pm.variables.set(\r
+
+      \    \"contactNumber\",\r
+
+      \    \"9876543210\"\r
+
+      );\r
+
+      \r
+
+      pm.variables.set(\r
+
+      \    \"email\",\r
+
+      \    \"john.smith@test.com\"\r
+
+      );\r
+
+      \r
+
+      pm.variables.set(\r
+
+      \    \"allergy\",\r
+
+      \    \"NONE\"\r
+
+      );\r
+
+      \r
+
+      pm.variables.set(\r
+
+      \    \"foodPreference\",\r
+
+      \    \"VEGAN\"\r
+
+      );\r
+
+      \r
+
+      pm.variables.set(\r
+
+      \    \"cuisineCategory\",\r
+
+      \    \"INDIAN\"\r
+
+      );\r
+
+      \r
+
+      pm.variables.set(\r
+
+      \    \"dateOfBirth\",\r
+
+      \    \"1990-05-15\"\r
+
+      );\r
+
+      \r
+
+      \r
+
+      // 7. SCENARIO-SPECIFIC CHANGES\r
+
+      \r
+
+      \r
+
+      if (scenario === \"valid\") {\r
+
+      \r
+
+      \    console.log(\r
+
+      \        \"Running valid update\"\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      else if (scenario === \"invalidEmail\") {\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"email\",\r
+
+      \        \"invalidemail\"\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      else if (scenario === \"invalidPatientId\") {\r
+
+      \r
+
+      \    requestPatientId = 999999;\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      else if (scenario === \"negativePatientId\") {\r
+
+      \r
+
+      \    requestPatientId = -1;\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      else if (scenario === \"invalidContactNumber\") {\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"contactNumber\",\r
+
+      \        \"AL23456OND\"\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      else if (scenario === \"updateContactNumber\") {\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"contactNumber\",\r
+
+      \        \"9876543211\"\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      else if (scenario === \"updateAllergy\") {\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"allergy\",\r
+
+      \        \"PEANUT\"\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      else if (scenario === \"invalidAllergy\") {\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"allergy\",\r
+
+      \        \"INVALID_ALLERGY\"\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      else if (scenario === \"missingAllergy\") {\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"allergy\",\r
+
+      \        \"\"\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      else if (scenario === \"updateFoodPreference\") {\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"foodPreference\",\r
+
+      \        \"NONVEG\"\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      else if (scenario === \"invalidFoodPreference\") {\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"foodPreference\",\r
+
+      \        \"INVALID_FOOD\"\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      else if (scenario === \"validCuisine\") {\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"cuisineCategory\",\r
+
+      \        \"ITALIAN\"\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      else if (scenario === \"invalidCuisine\") {\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"cuisineCategory\",\r
+
+      \        \"INVALID_CUISINE\"\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      else if (scenario === \"duplicateContactDOB\") {\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"contactNumber\",\r
+
+      \        \"9876543210\"\r
+
+      \    );\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"dateOfBirth\",\r
+
+      \        \"1990-05-15\"\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      else if (scenario === \"invalidDOBFormat\") {\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"dateOfBirth\",\r
+
+      \        \"15-05-1990\"\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      else if (scenario === \"futureDOB\") {\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"dateOfBirth\",\r
+
+      \        \"2030-05-15\"\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      else if (scenario === \"missingFirstName\") {\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"firstName\",\r
+
+      \        \"\"\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      else if (scenario === \"missingLastName\") {\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"lastName\",\r
+
+      \        \"\"\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      else if (scenario === \"invalidToken\") {\r
+
+      \r
+
+      \    console.log(\r
+
+      \        \"Invalid token scenario selected\"\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      else if (scenario === \"missingAuthorization\") {\r
+
+      \r
+
+      \    console.log(\r
+
+      \        \"Missing authorization scenario selected\"\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      // 8. SAVE FINAL PATIENT ID\r
+
+      \r
+
+      pm.collectionVariables.set(\r
+
+      \    \"requestPatientId\",\r
+
+      \    requestPatientId\r
+
+      );\r
+
+      \r
+
+      \r
+
+      // 9. DEBUG\r
+
+      \r
+
+      console.log(\r
+
+      \    \"FINAL requestPatientId:\",\r
+
+      \    requestPatientId\r
+
+      );\r
+
+      \r
+
+      console.log(\r
+
+      \    \"First Name:\",\r
+
+      \    pm.variables.get(\"firstName\")\r
+
+      );\r
+
+      \r
+
+      console.log(\r
+
+      \    \"Last Name:\",\r
+
+      \    pm.variables.get(\"lastName\")\r
+
+      );\r
+
+      \r
+
+      console.log(\r
+
+      \    \"Contact Number:\",\r
+
+      \    pm.variables.get(\"contactNumber\")\r
+
+      );\r
+
+      \r
+
+      console.log(\r
+
+      \    \"Email:\",\r
+
+      \    pm.variables.get(\"email\")\r
+
+      );\r
+
+      \r
+
+      console.log(\r
+
+      \    \"Allergy:\",\r
+
+      \    pm.variables.get(\"allergy\")\r
+
+      );\r
+
+      \r
+
+      console.log(\r
+
+      \    \"Food Preference:\",\r
+
+      \    pm.variables.get(\"foodPreference\")\r
+
+      );\r
+
+      \r
+
+      console.log(\r
+
+      \    \"Cuisine:\",\r
+
+      \    pm.variables.get(\"cuisineCategory\")\r
+
+      );\r
+
+      \r
+
+      console.log(\r
+
+      \    \"DOB:\",\r
+
+      \    pm.variables.get(\"dateOfBirth\")\r
+
+      );"
+    language: text/javascript
+  - type: afterResponse
+    code: "\r
+
+      // UPDATE PATIENT - POST-RESPONSE TEST SCRIPT\r
+
+      \r
+
+      \r
+
+      const scenario = pm.variables.get(\r
+
+      \    \"currentUpdateScenario\"\r
+
+      );\r
+
+      \r
+
+      console.log(\r
+
+      \    \"Testing scenario:\",\r
+
+      \    scenario\r
+
+      );\r
+
+      \r
+
+      \r
+
+      // VALID UPDATE SCENARIOS\r
+
+      \r
+
+      \r
+
+      if (\r
+
+      \    scenario === \"valid\" ||\r
+
+      \    scenario === \"updateContactNumber\" ||\r
+
+      \    scenario === \"updateAllergy\" ||\r
+
+      \    scenario === \"updateFoodPreference\" ||\r
+
+      \    scenario === \"validCuisine\"\r
+
+      ) {\r
+
+      \r
+
+      \    pm.test(\r
+
+      \        \"Update Patient - Valid Request\",\r
+
+      \        function () {\r
+
+      \r
+
+      \            pm.response.to.have.status(200);\r
+
+      \r
+
+      \        }\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      // INVALID REQUESTS - EXPECT 400\r
+
+      \r
+
+      \r
+
+      else if (\r
+
+      \    scenario === \"invalidEmail\" ||\r
+
+      \    scenario === \"invalidContactNumber\" ||\r
+
+      \    scenario === \"invalidAllergy\" ||\r
+
+      \    scenario === \"missingAllergy\" ||\r
+
+      \    scenario === \"invalidFoodPreference\" ||\r
+
+      \    scenario === \"invalidCuisine\" ||\r
+
+      \    scenario === \"duplicateContactDOB\" ||\r
+
+      \    scenario === \"invalidDOBFormat\" ||\r
+
+      \    scenario === \"futureDOB\" ||\r
+
+      \    scenario === \"missingFirstName\" ||\r
+
+      \    scenario === \"missingLastName\"\r
+
+      ) {\r
+
+      \r
+
+      \    pm.test(\r
+
+      \        \"Update Patient - Invalid Request\",\r
+
+      \        function () {\r
+
+      \r
+
+      \            pm.response.to.have.status(400);\r
+
+      \r
+
+      \        }\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      // INVALID PATIENT ID\r
+
+      \r
+
+      \r
+
+      else if (\r
+
+      \    scenario === \"invalidPatientId\" ||\r
+
+      \    scenario === \"negativePatientId\"\r
+
+      ) {\r
+
+      \r
+
+      \    pm.test(\r
+
+      \        \"Update Patient - Invalid Patient ID\",\r
+
+      \        function () {\r
+
+      \r
+
+      \            pm.expect([400, 404]).to.include(\r
+
+      \                pm.response.code\r
+
+      \            );\r
+
+      \r
+
+      \        }\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      // INVALID TOKEN\r
+
+      \r
+
+      \r
+
+      else if (scenario === \"invalidToken\") {\r
+
+      \r
+
+      \    pm.test(\r
+
+      \        \"Update Patient - Invalid Token\",\r
+
+      \        function () {\r
+
+      \r
+
+      \            pm.response.to.have.status(401);\r
+
+      \r
+
+      \        }\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      // MISSING AUTHORIZATION\r
+
+      \r
+
+      \r
+
+      else if (scenario === \"missingAuthorization\") {\r
+
+      \r
+
+      \    pm.test(\r
+
+      \        \"Update Patient - Missing Authorization\",\r
+
+      \        function () {\r
+
+      \r
+
+      \            pm.response.to.have.status(401);\r
+
+      \r
+
+      \        }\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      \r
+
+      // UNKNOWN SCENARIO\r
+
+      \r
+
+      \r
+
+      else {\r
+
+      \r
+
+      \    pm.test(\r
+
+      \        \"Scenario was provided\",\r
+
+      \        function () {\r
+
+      \r
+
+      \            pm.expect(scenario).to.not.be.null;\r
+
+      \r
+
+      \        }\r
+
+      \    );\r
+
+      \r
+
+      }\r
+
+      \r
+
+      // MOVE TO NEXT UPDATE TEST CASE\r
+
+      \r
+
+      let testIndex = Number(\r
+
+      \    pm.collectionVariables.get(\"updateTestIndex\")\r
+
+      );\r
+
+      \r
+
+      if (isNaN(testIndex)) {\r
+
+      \    testIndex = 0;\r
+
+      }\r
+
+      \r
+
+      pm.collectionVariables.set(\r
+
+      \    \"updateTestIndex\",\r
+
+      \    testIndex + 1\r
+
+      );"
+    language: text/javascript
+order: 5000
