@@ -1,0 +1,56 @@
+$kind: http-request
+url: "{{baseURL}}/login"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"userLoginEmail\": \"Dietitian3Helen@gmail.com\",\r
+
+    \  \"password\": \"test\"\r
+
+    }\r\n"
+auth:
+  type: bearer
+  credentials:
+    token: "{{dieticianToken}}"
+scripts:
+  - type: afterResponse
+    code: "if (pm.response.code === 200) {\r
+
+      \r
+
+      \    pm.test(\"Dietician Login Status\", function () {\r
+
+      \        pm.response.to.have.status(200);\r
+
+      \    });\r
+
+      \r
+
+      \    const response = pm.response.json();\r
+
+      \r
+
+      \    // Save token as Collection variable\r
+
+      \    pm.collectionVariables.set(\"dieticianToken\", response.token);\r
+
+      \r
+
+      } else {\r
+
+      \r
+
+      \    pm.test(\"Dietician Login Status\", function () {\r
+
+      \        pm.fail(\"Login failed with status: \" + pm.response.code);\r
+
+      \    });\r
+
+      }"
+    language: text/javascript
+  - type: beforeRequest
+    code: "\r\n"
+    language: text/javascript
+order: 1000

@@ -1,0 +1,33 @@
+$kind: http-request
+url: "{{baseURL}}/patient/{{envPatientId}}"
+method: PUT
+body:
+  type: formdata
+  content:
+    - type: text
+      key: patientInfo
+      value: '	{"FirstName": "{{firstName}}", "LastName": "{{lastName}}", "ContactNumber": "{{invalidcontactNumber}}", "Email": "{{email}}", "Allergy": "{{allergy}}", "FoodPreference": "{{foodPreference}}", "CuisineCategory": "{{cuisineCategory}}", "DateOfBirth": "{{dateOfBirth}}"}'
+    - type: file
+      key: file
+      src: []
+      disabled: true
+auth:
+  type: bearer
+  credentials:
+    token: "{{dieticianToken}}"
+scripts:
+  - type: beforeRequest
+    code: pm.collectionVariables.set("invalidcontactNumber", "AL23456OND");
+    language: text/javascript
+  - type: afterResponse
+    code: "pm.test(\"Invalid contact - Status 400\", function () {\r
+
+      \r
+
+      \    pm.response.to.have.status(400);\r
+
+      \r
+
+      });"
+    language: text/javascript
+order: 11000

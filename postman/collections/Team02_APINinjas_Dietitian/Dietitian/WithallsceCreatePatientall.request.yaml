@@ -1,0 +1,665 @@
+$kind: http-request
+url: "{{baseURL}}/patient"
+method: POST
+body:
+  type: formdata
+  content:
+    - type: text
+      key: patientInfo
+      value: '	{"FirstName": "{{firstName}}", "LastName": "{{lastName}}", "ContactNumber": "{{contactNumber}}", "Email": "{{email}}", "Allergy": "{{allergy}}", "FoodPreference": "{{foodPreference}}", "CuisineCategory": "{{cuisineCategory}}", "DateOfBirth": "{{dateOfBirth}}"}'
+    - type: file
+      key: file
+      src: []
+      disabled: true
+auth:
+  type: bearer
+  credentials:
+    token: "{{dieticianToken}}"
+scripts:
+  - type: beforeRequest
+    code: "// Retrieve testIndex\r
+
+      \r
+
+      let testIndex = Number(\r
+
+      \    pm.collectionVariables.get(\"testIndex\")\r
+
+      );\r
+
+      \r
+
+      if (isNaN(testIndex) || testIndex < 0) {\r
+
+      \    testIndex = 0;\r
+
+      }\r
+
+      \r
+
+      \r
+
+      // Test dataset\r
+
+      \r
+
+      const testCases = [\r
+
+      \r
+
+      \    {\r
+
+      \        scenario: \"Create patient with valid details\",\r
+
+      \        firstName: \"JohnNewfour\",\r
+
+      \        lastName: \"Smithnewfour\",\r
+
+      \        contactNumber: \"9584344226\",\r
+
+      \        email: \"johnsmithnewfour@gmail.com\",\r
+
+      \        allergy: \"MILK\",\r
+
+      \        foodPreference: \"VEGAN\",\r
+
+      \        cuisineCategory: \"Indian\",\r
+
+      \        dateOfBirth: \"1979-05-12\",\r
+
+      \        expectedStatus: 201\r
+
+      \    },\r
+
+      \r
+
+      \    {\r
+
+      \        scenario: \"Invalid email\",\r
+
+      \        firstName: \"JohnFe\",\r
+
+      \        lastName: \"Smithe\",\r
+
+      \        contactNumber: \"9584344235\",\r
+
+      \        email: \"invalidemail\",\r
+
+      \        allergy: \"MILK\",\r
+
+      \        foodPreference: \"VEGAN\",\r
+
+      \        cuisineCategory: \"Indian\",\r
+
+      \        dateOfBirth: \"1978-04-13\",\r
+
+      \        expectedStatus: 400\r
+
+      \    },\r
+
+      \r
+
+      \    {\r
+
+      \        scenario: \"Missing first name\",\r
+
+      \        firstName: \"\",\r
+
+      \        lastName: \"Smithe\",\r
+
+      \        contactNumber: \"9584344236\",\r
+
+      \        email: \"missingfirstname@gmail.com\",\r
+
+      \        allergy: \"MILK\",\r
+
+      \        foodPreference: \"VEGAN\",\r
+
+      \        cuisineCategory: \"Indian\",\r
+
+      \        dateOfBirth: \"1978-04-14\",\r
+
+      \        expectedStatus: 400\r
+
+      \    },\r
+
+      \r
+
+      \    {\r
+
+      \        scenario: \"Missing last name\",\r
+
+      \        firstName: \"John\",\r
+
+      \        lastName: \"\",\r
+
+      \        contactNumber: \"9584344237\",\r
+
+      \        email: \"missinglastname@gmail.com\",\r
+
+      \        allergy: \"MILK\",\r
+
+      \        foodPreference: \"VEGAN\",\r
+
+      \        cuisineCategory: \"Indian\",\r
+
+      \        dateOfBirth: \"1978-04-15\",\r
+
+      \        expectedStatus: 400\r
+
+      \    },\r
+
+      \r
+
+      \    {\r
+
+      \        scenario: \"Missing email\",\r
+
+      \        firstName: \"John\",\r
+
+      \        lastName: \"Smith\",\r
+
+      \        contactNumber: \"9584344238\",\r
+
+      \        email: \"\",\r
+
+      \        allergy: \"MILK\",\r
+
+      \        foodPreference: \"VEGAN\",\r
+
+      \        cuisineCategory: \"Indian\",\r
+
+      \        dateOfBirth: \"1978-04-16\",\r
+
+      \        expectedStatus: 400\r
+
+      \    },\r
+
+      \r
+
+      \    {\r
+
+      \        scenario: \"Invalid contact number\",\r
+
+      \        firstName: \"John\",\r
+
+      \        lastName: \"Smith\",\r
+
+      \        contactNumber: \"ABC1234567\",\r
+
+      \        email: \"invalidcontact@gmail.com\",\r
+
+      \        allergy: \"MILK\",\r
+
+      \        foodPreference: \"VEGAN\",\r
+
+      \        cuisineCategory: \"Indian\",\r
+
+      \        dateOfBirth: \"1978-04-17\",\r
+
+      \        expectedStatus: 400\r
+
+      \    },\r
+
+      \r
+
+      \    {\r
+
+      \        scenario: \"Missing contact number\",\r
+
+      \        firstName: \"John\",\r
+
+      \        lastName: \"Smith\",\r
+
+      \        contactNumber: \"\",\r
+
+      \        email: \"missingcontact@gmail.com\",\r
+
+      \        allergy: \"MILK\",\r
+
+      \        foodPreference: \"VEGAN\",\r
+
+      \        cuisineCategory: \"Indian\",\r
+
+      \        dateOfBirth: \"1978-04-18\",\r
+
+      \        expectedStatus: 400\r
+
+      \    },\r
+
+      \r
+
+      \    {\r
+
+      \        scenario: \"Invalid allergy\",\r
+
+      \        firstName: \"John\",\r
+
+      \        lastName: \"Smith\",\r
+
+      \        contactNumber: \"9584344240\",\r
+
+      \        email: \"invalidallergy@gmail.com\",\r
+
+      \        allergy: \"INVALID_ALLERGY\",\r
+
+      \        foodPreference: \"VEGAN\",\r
+
+      \        cuisineCategory: \"Indian\",\r
+
+      \        dateOfBirth: \"1978-04-19\",\r
+
+      \        expectedStatus: 400\r
+
+      \    },\r
+
+      \r
+
+      \    {\r
+
+      \        scenario: \"Missing allergy\",\r
+
+      \        firstName: \"John\",\r
+
+      \        lastName: \"Smith\",\r
+
+      \        contactNumber: \"9584344241\",\r
+
+      \        email: \"missingallergy@gmail.com\",\r
+
+      \        allergy: \"\",\r
+
+      \        foodPreference: \"VEGAN\",\r
+
+      \        cuisineCategory: \"Indian\",\r
+
+      \        dateOfBirth: \"1978-04-20\",\r
+
+      \        expectedStatus: 400\r
+
+      \    },\r
+
+      \r
+
+      \    {\r
+
+      \        scenario: \"Invalid food preference\",\r
+
+      \        firstName: \"John\",\r
+
+      \        lastName: \"Smith\",\r
+
+      \        contactNumber: \"9584344242\",\r
+
+      \        email: \"invalidfood@gmail.com\",\r
+
+      \        allergy: \"MILK\",\r
+
+      \        foodPreference: \"INVALID_FOOD\",\r
+
+      \        cuisineCategory: \"Indian\",\r
+
+      \        dateOfBirth: \"1978-04-21\",\r
+
+      \        expectedStatus: 400\r
+
+      \    },\r
+
+      \r
+
+      \    {\r
+
+      \        scenario: \"Invalid cuisine\",\r
+
+      \        firstName: \"John\",\r
+
+      \        lastName: \"Smith\",\r
+
+      \        contactNumber: \"9584344243\",\r
+
+      \        email: \"invalidcuisine@gmail.com\",\r
+
+      \        allergy: \"MILK\",\r
+
+      \        foodPreference: \"VEGAN\",\r
+
+      \        cuisineCategory: \"INVALID_CUISINE\",\r
+
+      \        dateOfBirth: \"1978-04-22\",\r
+
+      \        expectedStatus: 400\r
+
+      \    },\r
+
+      \r
+
+      \    {\r
+
+      \        scenario: \"Missing cuisine\",\r
+
+      \        firstName: \"John\",\r
+
+      \        lastName: \"Smith\",\r
+
+      \        contactNumber: \"9584344244\",\r
+
+      \        email: \"missingcuisine@gmail.com\",\r
+
+      \        allergy: \"MILK\",\r
+
+      \        foodPreference: \"VEGAN\",\r
+
+      \        cuisineCategory: \"\",\r
+
+      \        dateOfBirth: \"1978-04-23\",\r
+
+      \        expectedStatus: 400\r
+
+      \    },\r
+
+      \r
+
+      \    {\r
+
+      \        scenario: \"Invalid DOB format\",\r
+
+      \        firstName: \"John\",\r
+
+      \        lastName: \"Smith\",\r
+
+      \        contactNumber: \"9584344245\",\r
+
+      \        email: \"invaliddob@gmail.com\",\r
+
+      \        allergy: \"MILK\",\r
+
+      \        foodPreference: \"VEGAN\",\r
+
+      \        cuisineCategory: \"Indian\",\r
+
+      \        dateOfBirth: \"12-04-1978\",\r
+
+      \        expectedStatus: 400\r
+
+      \    },\r
+
+      \r
+
+      \    {\r
+
+      \        scenario: \"Future DOB\",\r
+
+      \        firstName: \"John\",\r
+
+      \        lastName: \"Smith\",\r
+
+      \        contactNumber: \"9584344246\",\r
+
+      \        email: \"futuredob@gmail.com\",\r
+
+      \        allergy: \"MILK\",\r
+
+      \        foodPreference: \"VEGAN\",\r
+
+      \        cuisineCategory: \"Indian\",\r
+
+      \        dateOfBirth: \"2035-04-12\",\r
+
+      \        expectedStatus: 400\r
+
+      \    },\r
+
+      \r
+
+      \    {\r
+
+      \        scenario: \"Missing DOB\",\r
+
+      \        firstName: \"John\",\r
+
+      \        lastName: \"Smith\",\r
+
+      \        contactNumber: \"9584344247\",\r
+
+      \        email: \"missingdob@gmail.com\",\r
+
+      \        allergy: \"MILK\",\r
+
+      \        foodPreference: \"VEGAN\",\r
+
+      \        cuisineCategory: \"Indian\",\r
+
+      \        dateOfBirth: \"\",\r
+
+      \        expectedStatus: 400\r
+
+      \    }\r
+
+      \r
+
+      ];\r
+
+      \r
+
+      \r
+
+      // Extract current test case\r
+
+      \r
+
+      const currentTest = testCases[testIndex];\r
+
+      \r
+
+      if (currentTest) {\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"currentScenario\",\r
+
+      \        currentTest.scenario\r
+
+      \    );\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"firstName\",\r
+
+      \        currentTest.firstName\r
+
+      \    );\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"lastName\",\r
+
+      \        currentTest.lastName\r
+
+      \    );\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"contactNumber\",\r
+
+      \        currentTest.contactNumber\r
+
+      \    );\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"email\",\r
+
+      \        currentTest.email\r
+
+      \    );\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"allergy\",\r
+
+      \        currentTest.allergy\r
+
+      \    );\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"foodPreference\",\r
+
+      \        currentTest.foodPreference\r
+
+      \    );\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"cuisineCategory\",\r
+
+      \        currentTest.cuisineCategory\r
+
+      \    );\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"dateOfBirth\",\r
+
+      \        currentTest.dateOfBirth\r
+
+      \    );\r
+
+      \r
+
+      \    pm.variables.set(\r
+
+      \        \"currentExpectedStatus\",\r
+
+      \        currentTest.expectedStatus\r
+
+      \    );\r
+
+      \r
+
+      }"
+    language: text/javascript
+  - type: afterResponse
+    code: "const scenario = pm.variables.get(\r
+
+      \    \"currentScenario\"\r
+
+      );\r
+
+      \r
+
+      const expectedStatus = Number(\r
+
+      \    pm.variables.get(\"currentExpectedStatus\")\r
+
+      );\r
+
+      \r
+
+      pm.test(\r
+
+      \    scenario + \" - Status Code is \" + expectedStatus,\r
+
+      \    function () {\r
+
+      \r
+
+      \        pm.expect(\r
+
+      \            pm.response.code\r
+
+      \        ).to.eql(expectedStatus);\r
+
+      \r
+
+      \    }\r
+
+      );\r
+
+      \r
+
+      \r
+
+      // Save Patient ID only for successful creation\r
+
+      \r
+
+      if (pm.response.code === 201) {\r
+
+      \r
+
+      \    const response = pm.response.json();\r
+
+      \r
+
+      \    pm.collectionVariables.set(\r
+
+      \        \"envPatientId\",\r
+
+      \        response.patientId\r
+
+      \    );\r
+
+      \r
+
+      \    console.log(\r
+
+      \        \"Created Patient ID:\",\r
+
+      \        response.patientId\r
+
+      \    );\r
+
+      }\r
+
+      \r
+
+      \r
+
+      // Move to next test case\r
+
+      \r
+
+      let testIndex = Number(\r
+
+      \    pm.collectionVariables.get(\"testIndex\")\r
+
+      );\r
+
+      \r
+
+      if (isNaN(testIndex)) {\r
+
+      \    testIndex = 0;\r
+
+      }\r
+
+      \r
+
+      pm.collectionVariables.set(\r
+
+      \    \"testIndex\",\r
+
+      \    testIndex + 1\r
+
+      );"
+    language: text/javascript
+order: 4000

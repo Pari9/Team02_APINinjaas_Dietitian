@@ -1,0 +1,42 @@
+$kind: http-request
+url: "{{baseURL}}/login"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"userLoginEmail\": \"{{adminID}}\",\r
+
+    \  \"password\": \"{{password}}\"\r
+
+    }\r\n"
+scripts:
+  - type: afterResponse
+    code: "if (pm.response.code === 200) {\r
+
+      \    pm.test(\"Admin Login Status\", function () {\r
+
+      \        pm.response.to.have.status(200);\r
+
+      \    });\r
+
+      \r
+
+      \    const response = pm.response.json();\r
+
+      \    pm.collectionVariables.set(\"adminToken\", response.token);\r
+
+      \    } else {\r
+
+      \    pm.test(\"Admin Login Status\", function () {\r
+
+      \        pm.fail(\"Login failed with status: \" + pm.response.code);\r
+
+      \    });\r
+
+      }\r\n"
+    language: text/javascript
+  - type: beforeRequest
+    code: "console.log(\"Executing AdminLogin\");\r\n"
+    language: text/javascript
+order: 1000

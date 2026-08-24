@@ -1,0 +1,147 @@
+$kind: http-request
+url: "{{baseURL}}/patient"
+method: POST
+body:
+  type: formdata
+  content:
+    - type: text
+      key: patientInfo
+      value: '	{"FirstName": "{{firstName}}", "LastName": "{{lastName}}", "ContactNumber": "{{contactNumber}}", "Email": "{{email}}", "Allergy": "{{allergy}}", "FoodPreference": "{{foodPreference}}", "CuisineCategory": "{{cuisineCategory}}", "DateOfBirth": "{{dateOfBirth}}"}'
+    - type: file
+      key: file
+      src:
+        - /C:/Users/nived/Documents/Niv/Data Analytics/NinjaNumpy/API HAckathon/Dietician API Hackathon/Diabetic and Hemogram Test_Thyrocare lab.pdf.pdf
+auth:
+  type: bearer
+  credentials:
+    token: "{{dieticianToken}}"
+scripts:
+  - type: beforeRequest
+    code: "pm.collectionVariables.set(\"firstName\", \"Johnneweight\");\r
+
+      pm.collectionVariables.set(\"lastName\", \"Smithneweight\");\r
+
+      pm.collectionVariables.set(\"contactNumber\", \"9584324234\");\r
+
+      pm.collectionVariables.set(\"email\", \"johnsmithneweight@gmail.com\");\r
+
+      pm.collectionVariables.set(\"allergy\", \"MILK\");\r
+
+      pm.collectionVariables.set(\"foodPreference\", \"Vegan\");\r
+
+      pm.collectionVariables.set(\"cuisineCategory\", \"Indian\");\r
+
+      pm.collectionVariables.set(\"dateOfBirth\", \"1976-04-05\");\r
+
+      \r
+
+      /*const patients = [\r
+
+      \    {\r
+
+      \        firstName: \"John\",\r
+
+      \        lastName: \"Smith\",\r
+
+      \        contactNumber: \"9876543210\",\r
+
+      \        email: \"johnsmith@gmail.com\",\r
+
+      \        allergy: \"NONE\",\r
+
+      \        foodPreference: \"Vegetarian\",\r
+
+      \        cuisineCategory: \"Indian\",\r
+
+      \        dateOfBirth: \"1990-05-15\"\r
+
+      \    },\r
+
+      \    {\r
+
+      \        firstName: \"Mary\",\r
+
+      \        lastName: \"Johnson\",\r
+
+      \        contactNumber: \"9876543211\",\r
+
+      \        email: \"maryjohnson@gmail.com\",\r
+
+      \        allergy: \"PEANUT\",\r
+
+      \        foodPreference: \"Vegan\",\r
+
+      \        cuisineCategory: \"South Indian\",\r
+
+      \        dateOfBirth: \"1988-08-20\"\r
+
+      \    },\r
+
+      \    {\r
+
+      \        firstName: \"David\",\r
+
+      \        lastName: \"Brown\",\r
+
+      \        contactNumber: \"9876543212\",\r
+
+      \        email: \"davidbrown@gmail.com\",\r
+
+      \        allergy: \"MILK\",\r
+
+      \        foodPreference: \"NonVeg\",\r
+
+      \        cuisineCategory: \"Punjabi\",\r
+
+      \        dateOfBirth: \"1992-03-10\"\r
+
+      \    }\r
+
+      ];\r
+
+      \r
+
+      const index = pm.info.iteration;\r
+
+      const patient = patients[index];\r
+
+      \r
+
+      pm.environment.set(\"firstName\", patient.firstName);\r
+
+      pm.environment.set(\"lastName\", patient.lastName);\r
+
+      pm.environment.set(\"contactNumber\", patient.contactNumber);\r
+
+      pm.environment.set(\"email\", patient.email);\r
+
+      pm.environment.set(\"allergy\", patient.allergy);\r
+
+      pm.environment.set(\"foodPreference\", patient.foodPreference);\r
+
+      pm.environment.set(\"cuisineCategory\", patient.cuisineCategory);\r
+
+      pm.environment.set(\"dateOfBirth\", patient.dateOfBirth);\r
+
+      */"
+    language: text/javascript
+  - type: afterResponse
+    code: "pm.test(\"Status code is 201\", function () {\r
+
+      \    pm.expect(pm.response.code).to.eql(201);\r
+
+      });\r
+
+      \r
+
+      const response = pm.response.json();\r
+
+      \r
+
+      if (pm.response.code === 201) {\r
+
+      \    pm.environment.set(\"envPatientId\", response.patientId);\r
+
+      }"
+    language: text/javascript
+order: 3000

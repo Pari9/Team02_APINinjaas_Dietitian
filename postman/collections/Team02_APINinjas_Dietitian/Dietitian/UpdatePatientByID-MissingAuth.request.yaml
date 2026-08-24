@@ -1,0 +1,36 @@
+$kind: http-request
+url: "{{baseURL}}/patient/{{envPatientId}}"
+method: PUT
+body:
+  type: formdata
+  content:
+    - type: text
+      key: patientInfo
+      value: '	{"FirstName": "{{firstName}}", "LastName": "{{lastName}}", "ContactNumber": "{{contactNumber}}", "Email": "{{email}}", "Allergy": "{{allergy}}", "FoodPreference": "{{foodPreference}}", "CuisineCategory": "{{cuisineCategory}}", "DateOfBirth": "{{dateOfBirth}}"}'
+    - type: file
+      key: file
+      src: []
+      disabled: true
+auth:
+  type: bearer
+  credentials:
+    token: ""
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"Status code is 401\", function () {\r
+
+      \    pm.expect(pm.response.code).to.eql(401);\r
+
+      });\r
+
+      \r
+
+      if (pm.response.code === 401) {\r
+
+      \    console.log(\"Status Code:\", pm.response.code);\r
+
+      \    console.log(\"Error Message:\", pm.response.text());\r
+
+      }"
+    language: text/javascript
+order: 15000

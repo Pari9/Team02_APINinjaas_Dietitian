@@ -1,0 +1,11 @@
+$kind: http-request
+url: "{{baseURL}}/dietician"
+method: POST
+body:
+  type: formdata
+  content: []
+auth:
+  type: bearer
+  credentials:
+    token: "{{adminToken}}"
+order: 3000
